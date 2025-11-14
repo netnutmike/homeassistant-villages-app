@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure The Villages Events",
+        "description": "Set up The Villages Events integration to track entertainment events.",
+        "data": {
+          "update_interval": "Update interval (minutes)",
+          "favorite_performers": "Favorite performers (comma-separated)"
+        }
+      }
+    },
+    "error": {
+      "invalid_update_interval": "Update interval must be between 15 and 1440 minutes"
+    },
+    "abort": {
+      "already_configured": "This integration is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure The Villages Events",
+        "description": "Update your configuration for The Villages Events integration.",
+        "data": {
+          "update_interval": "Update interval (minutes)",
+          "favorite_performers": "Favorite performers (comma-separated)"
+        }
+      }
+    },
+    "error": {
+      "invalid_update_interval": "Update interval must be between 15 and 1440 minutes"
+    }
+  }
+}
