@@ -751,12 +751,81 @@ if result["favorite_today"] and not self.last_data.get("favorite_today"):
 
 ---
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
+
+- **MAJOR** version for incompatible API changes
+- **MINOR** version for new functionality in a backward compatible manner
+- **PATCH** version for backward compatible bug fixes
+
+### Version Management
+
+The version is maintained in three places and must be kept in sync:
+
+1. **`custom_components/villages_events/__version__.py`**: Python version constant
+2. **`custom_components/villages_events/manifest.json`**: Home Assistant manifest version
+3. **`CHANGELOG.md`**: Version history and release notes
+
+### Releasing a New Version
+
+1. **Update version numbers**:
+```bash
+# Update __version__.py
+echo '__version__ = "0.2.0"' > custom_components/villages_events/__version__.py
+
+# Update manifest.json
+# Change "version": "0.2.0"
+```
+
+2. **Update CHANGELOG.md**:
+```markdown
+## [0.2.0] - 2025-02-15
+
+### Added
+- New feature description
+
+### Changed
+- Modified behavior description
+
+### Fixed
+- Bug fix description
+```
+
+3. **Commit and tag**:
+```bash
+git add .
+git commit -m "Release version 0.2.0"
+git tag -a v0.2.0 -m "Version 0.2.0"
+git push origin main --tags
+```
+
+4. **Create GitHub release**:
+- Go to GitHub repository
+- Click "Releases" → "Create a new release"
+- Select the tag (v0.2.0)
+- Copy changelog content for release notes
+- Attach release assets if needed
+- Publish release
+
+### Version Checking in Code
+
+Access the version programmatically:
+
+```python
+from custom_components.villages_events import __version__
+
+_LOGGER.info("The Villages Events integration version %s", __version__)
+```
+
 ## Additional Resources
 
 - [Home Assistant Developer Docs](https://developers.home-assistant.io/)
 - [python-villages-events Library](https://github.com/yourusername/python-villages-events)
 - [HACS Documentation](https://hacs.xyz/)
 - [Home Assistant Architecture](https://developers.home-assistant.io/docs/architecture_index)
+- [Semantic Versioning](https://semver.org/)
+- [Keep a Changelog](https://keepachangelog.com/)
 
 ## Contributing
 
@@ -767,7 +836,8 @@ When contributing to this integration:
 3. Make your changes following the style guide
 4. Add tests for new functionality
 5. Update documentation
-6. Submit a pull request
+6. Update CHANGELOG.md with your changes
+7. Submit a pull request
 
 ## Support
 
