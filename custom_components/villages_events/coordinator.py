@@ -133,7 +133,15 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         """
         try:
             # Import here to avoid issues if library not installed
-            from villages_events import VillagesEvents
+            try:
+                from villages_events import VillagesEvents
+            except ImportError:
+                _LOGGER.warning(
+                    "python-villages-events library not installed. "
+                    "Using mock data for development/testing."
+                )
+                # Return mock data for development
+                return self._get_mock_data()
             
             # Calculate today and tomorrow based on HA timezone
             now = dt_util.now()
@@ -389,3 +397,85 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             ```
         """
         return self.consecutive_failures >= MAX_CONSECUTIVE_FAILURES
+
+    def _get_mock_data(self) -> dict[str, Any]:
+        """Return mock data for development/testing.
+        
+        This method provides sample data when the python-villages-events
+        library is not installed, allowing development and testing of the
+        integration without the actual library.
+        
+        Returns:
+            Dictionary with mock venue and event data
+        """
+        from datetime import time
+        
+        now = dt_util.now()
+        
+        # Create mock events
+        mock_venues_data = {
+            "Spanish Springs Town Square": {
+                PERIOD_TODAY: [
+                    {
+                        "performer": "The Fabulous Fleetwoods",
+                        "start_time": now.replace(hour=19, minute=0, second=0, microsecond=0),
+                        "end_time": now.replace(hour=21, minute=0, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                    {
+                        "performer": "Retro Express",
+                        "start_time": now.replace(hour=21, minute=30, second=0, microsecond=0),
+                        "end_time": now.replace(hour=23, minute=0, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                ],
+                PERIOD_TOMORROW: [
+                    {
+                        "performer": "The British Invasion",
+                        "start_time": now.replace(hour=19, minute=0, second=0, microsecond=0),
+                        "end_time": now.replace(hour=21, minute=0, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                ],
+            },
+            "Lake Sumter Landing": {
+                PERIOD_TODAY: [
+                    {
+                        "performer": "Jazz Ensemble",
+                        "start_time": now.replace(hour=18, minute=0, second=0, microsecond=0),
+                        "end_time": now.replace(hour=20, minute=0, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                ],
+                PERIOD_TOMORROW: [
+                    {
+                        "performer": "Country Stars",
+                        "start_time": now.replace(hour=19, minute=30, second=0, microsecond=0),
+                        "end_time": now.replace(hour=21, minute=30, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                ],
+            },
+            "Brownwood Paddock Square": {
+                PERIOD_TODAY: [],
+                PERIOD_TOMORROW: [
+                    {
+                        "performer": "Rock Legends",
+                        "start_time": now.replace(hour=20, minute=0, second=0, microsecond=0),
+                        "end_time": now.replace(hour=22, minute=0, second=0, microsecond=0),
+                        "event_type": "Live Music",
+                    },
+                ],
+            },
+        }
+        
+        result = {
+            "venues": mock_venues_data,
+        }
+        
+        # Add favorite performer matching
+        result.update(self._match_favorite_performers(mock_venues_data))
+        
+        _LOGGER.info("Using mock data with %d venues", len(mock_venues_data))
+        
+        return result

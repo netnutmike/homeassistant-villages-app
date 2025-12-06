@@ -202,6 +202,18 @@ automation:
             {{ total }} events scheduled today at The Villages!
 ```
 
+## Development Mode
+
+If the `python-villages-events` library is not installed, the integration will automatically use mock data for development and testing purposes. You'll see a warning in the logs:
+
+```
+python-villages-events library not installed. Using mock data for development/testing.
+```
+
+The mock data includes sample events at three venues (Spanish Springs Town Square, Lake Sumter Landing, and Brownwood Paddock Square) to allow testing of the integration's functionality.
+
+To use real data, install the `python-villages-events` library and add it back to the `manifest.json` requirements.
+
 ## Troubleshooting
 
 ### Integration Not Showing Events
@@ -213,6 +225,7 @@ automation:
 - Verify The Villages calendar website is accessible
 - Check Home Assistant logs for error messages: **Settings** → **System** → **Logs**
 - Try reloading the integration: **Settings** → **Devices & Services** → **The Villages Events** → **⋮** → **Reload**
+- If using development mode, check that mock data is being loaded (look for "Using mock data" in logs)
 
 ### Favorite Performers Not Detected
 
