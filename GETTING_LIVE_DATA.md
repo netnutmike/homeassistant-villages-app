@@ -1,66 +1,43 @@
 # Getting Live Data from The Villages Calendar
 
-Your Home Assistant integration is currently using **mock data** for testing. To fetch real event data from The Villages calendar, you need to install the `python-villages-events` library.
+Good news! The integration now has the Villages Events library **built-in**. No separate installation required!
 
 ## Quick Start
 
-### Step 1: Install the Library
+### Step 1: Install the Integration
 
-The library is included in this repository under `python-villages-events/`. Install it:
+The integration already includes all the code needed to fetch real data from The Villages calendar.
 
-```bash
-cd python-villages-events
-pip install .
-```
-
-Or if you're using Home Assistant OS, install via SSH or Terminal add-on:
-
-```bash
-pip install /config/custom_components/python-villages-events
-```
-
-### Step 2: Test the Library
-
-Verify it works:
-
-```bash
-cd python-villages-events
-python test_library.py
-```
-
-You should see real events from The Villages calendar.
-
-### Step 3: Restart Home Assistant
+### Step 2: Restart Home Assistant
 
 Restart Home Assistant completely (not just reload the integration).
 
-### Step 4: Verify Live Data
+### Step 3: Verify Live Data
 
 Check the logs (**Settings** → **System** → **Logs**):
 
 **Success (Live Data):**
 ```
-Successfully fetched events for 3 venues
+Successfully fetched events for X venues
 ```
 
-**Still Mock Data:**
+**Fallback (Mock Data):**
 ```
-python-villages-events library not installed. Using mock data for development/testing.
+Villages events library import failed. Using mock data for development/testing.
 ```
+
+If you see the fallback message, check for any import errors in the logs.
 
 ## What's Included
 
-The `python-villages-events` library I created for you includes:
+The integration now includes the Villages Events library **built-in** at:
+`custom_components/villages_events/villages_events/`
 
-### Files Created:
+### Files Included:
 - `villages_events/__init__.py` - Package initialization
 - `villages_events/client.py` - Main VillagesEvents client class
 - `villages_events/config.py` - Configuration and URLs
 - `villages_events/exceptions.py` - Custom exceptions
-- `setup.py` - Package installation configuration
-- `README.md` - Library documentation
-- `INSTALL.md` - Detailed installation guide
-- `test_library.py` - Test script
 
 ### Features:
 - ✅ Fetches real data from The Villages API
@@ -70,54 +47,28 @@ The `python-villages-events` library I created for you includes:
 - ✅ Groups events by venue
 - ✅ Extracts performer, times, and event details
 - ✅ Compatible with Home Assistant's async executor
+- ✅ No external dependencies required!
 
 ### Based On:
 The library is based on your existing Villages Event Scraper code from:
 https://github.com/netnutmike/python-villages-events/tree/V1.1_Preamble
 
-I extracted the core functionality and packaged it as a reusable library.
+I extracted the core functionality and embedded it directly into the integration.
 
-## Publishing to PyPI (Optional)
+## No PyPI Publishing Needed!
 
-To make installation easier for others:
-
-1. **Create PyPI account**: https://pypi.org/account/register/
-
-2. **Install build tools**:
-   ```bash
-   pip install build twine
-   ```
-
-3. **Build the package**:
-   ```bash
-   cd python-villages-events
-   python -m build
-   ```
-
-4. **Upload to PyPI**:
-   ```bash
-   python -m twine upload dist/*
-   ```
-
-5. **Update manifest** (already done):
-   The integration's `manifest.json` already specifies:
-   ```json
-   "requirements": ["python-villages-events>=1.1.0"]
-   ```
-
-Once published, Home Assistant will automatically install it from PyPI.
+Since the library is now embedded directly in the integration, there's no need to publish to PyPI. Everything works out of the box!
 
 ## Troubleshooting
 
-### Library Not Found After Installation
+### Library Import Failed
 
-**Problem**: Home Assistant still shows "library not installed"
+**Problem**: Logs show "Villages events library import failed"
 
 **Solutions**:
-1. Ensure you installed in the correct Python environment
-2. Check Home Assistant's Python path: `which python3`
-3. Try installing with full path: `python3 -m pip install ./python-villages-events`
-4. Restart Home Assistant completely (not just reload)
+1. Check for detailed error messages in the logs
+2. Verify all files are present in `custom_components/villages_events/villages_events/`
+3. Restart Home Assistant completely (not just reload)
 
 ### Import Errors
 
@@ -150,17 +101,14 @@ Once published, Home Assistant will automatically install it from PyPI.
 
 ## Current Status
 
-- ✅ Integration installed and working with mock data
-- ✅ Library created and ready to install
-- ⏳ Waiting for library installation
-- ⏳ Waiting for live data verification
+- ✅ Integration installed and working
+- ✅ Library embedded directly in the integration
+- ✅ Ready to fetch live data!
 
 ## Next Steps
 
-1. Install the library (see Step 1 above)
-2. Test it works (see Step 2 above)
-3. Restart Home Assistant (see Step 3 above)
-4. Verify live data (see Step 4 above)
-5. (Optional) Publish to PyPI for easier distribution
+1. Restart Home Assistant
+2. Check logs to verify live data is being fetched
+3. Enjoy real event data from The Villages!
 
-Once the library is installed, your integration will automatically start fetching real event data from The Villages calendar!
+The integration will automatically start fetching real event data from The Villages calendar!

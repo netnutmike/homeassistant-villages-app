@@ -137,13 +137,13 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             UpdateFailed: When data fetch fails after retries.
         """
         try:
-            # Import here to avoid issues if library not installed
+            # Import from local villages_events module
             try:
-                from villages_events import VillagesEvents
-            except ImportError:
+                from .villages_events import VillagesEvents
+            except ImportError as e:
                 _LOGGER.warning(
-                    "python-villages-events library not installed. "
-                    "Using mock data for development/testing."
+                    "Villages events library import failed: %s. "
+                    "Using mock data for development/testing.", e
                 )
                 # Return mock data for development
                 return self._get_mock_data()
@@ -244,11 +244,11 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             
         except ImportError as err:
             _LOGGER.error(
-                "python-villages-events library not installed: %s",
+                "Villages events library not available: %s",
                 err,
             )
             raise UpdateFailed(
-                "python-villages-events library not available"
+                "Villages events library not available"
             ) from err
             
         except (ConnectionError, TimeoutError) as err:

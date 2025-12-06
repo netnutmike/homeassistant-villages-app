@@ -386,42 +386,26 @@ automation:
 
 ## Data Source
 
-This integration uses the `python-villages-events` library to fetch real event data from The Villages entertainment calendar.
+This integration includes built-in code to fetch real event data from The Villages entertainment calendar API. No external libraries are required!
 
-### Getting Live Data
+### Live Data
 
-The integration currently uses mock data because the `python-villages-events` library needs to be installed. To get live data:
+The integration automatically fetches live event data from The Villages calendar. Simply install the integration and it will start pulling real events.
 
-#### Option 1: Install the Library Locally
-
-1. Navigate to the `python-villages-events` directory in this repository
-2. Install the library:
-   ```bash
-   cd python-villages-events
-   pip install .
-   ```
-3. Restart Home Assistant
-4. The integration will automatically start using real data
-
-#### Option 2: Publish to PyPI (Recommended)
-
-1. Follow the instructions in `python-villages-events/INSTALL.md`
-2. Publish the library to PyPI
-3. Restart Home Assistant - it will automatically install the library
-
-### Development Mode
-
-If the `python-villages-events` library is not installed, the integration will automatically fall back to mock data for development and testing purposes. You'll see a warning in the logs:
-
-```
-python-villages-events library not installed. Using mock data for development/testing.
-```
-
-Once the library is installed, you'll see:
-
+**What you'll see in the logs:**
 ```
 Successfully fetched events for X venues
 ```
+
+### Development Mode (Fallback)
+
+If there are any issues connecting to The Villages API, the integration will automatically fall back to mock data for testing. You'll see a warning:
+
+```
+Villages events library import failed. Using mock data for development/testing.
+```
+
+This ensures the integration continues to work even if The Villages website is temporarily unavailable.
 
 ## Troubleshooting
 
