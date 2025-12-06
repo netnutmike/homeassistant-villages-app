@@ -40,9 +40,9 @@ class VillagesEvents:
             response.raise_for_status()
             
             # Extract token from JavaScript using regex
-            # Looking for pattern like: authorization:"Basic <base64_token>"
-            match = re.search(r'authorization\s*:\s*["\']Basic\s+([A-Za-z0-9+/=]+)["\']', 
-                            response.text)
+            # Looking for pattern like: Authorization:"Basic <base64_token>" or Authorization:`Basic ${token}`
+            match = re.search(r'Authorization\s*:\s*["\']?Basic\s+([A-Za-z0-9+/=]+)["\']?', 
+                            response.text, re.IGNORECASE)
             
             if not match:
                 raise AuthError("Could not find authorization token in JavaScript file")
