@@ -7,19 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-01-XX
+## [0.1.0] - 2024-12-06
 
 ### Added
 - Initial release of The Villages Events integration
 - Per-venue event sensors for today and tomorrow
 - Binary sensors for favorite performer tracking
-- UI-based configuration flow
+- UI-based configuration flow with options flow support
 - Configurable update intervals (15-1440 minutes)
 - Favorite performer matching with case-insensitive search
 - Automatic retry with exponential backoff on failures
 - Rich event attributes (performer, times, event type, venue)
+- Easy-access `performers` attribute for simple performer name lists
+- Easy-access `venues` attribute for favorite performer binary sensors
+- Home Assistant events for automations:
+  - `villages_events_favorite_performer` - Fired when favorites are detected
+  - `villages_events_new_events` - Fired when new events are added
+- Manual refresh service: `villages_events.refresh`
+- Live data fetching from The Villages API
+- Embedded Villages Events library (no external dependencies)
+- Custom integration icons for HACS
 - HACS compatibility
-- Comprehensive developer documentation
+- Comprehensive documentation:
+  - Developer guide (DEVELOPER.md)
+  - Events documentation (EVENTS.md)
+  - Services documentation (SERVICES.md)
+  - Troubleshooting guide (TROUBLESHOOTING.md)
+  - Getting live data guide (GETTING_LIVE_DATA.md)
 - Inline code documentation with Google-style docstrings
 
 ### Features
@@ -29,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Entity availability tracking
 - Last updated timestamps
 - Event count and detailed event information
+- Performer names easily accessible in attributes
+- Mock data fallback for testing and development
 
 [Unreleased]: https://github.com/yourusername/villages-events-integration/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/yourusername/villages-events-integration/releases/tag/v0.1.0

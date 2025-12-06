@@ -34,10 +34,14 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from .__version__ import __version__
 from .const import DOMAIN
 from .coordinator import VillagesEventsCoordinator
 
 _LOGGER = logging.getLogger(__name__)
+
+# Expose version for Home Assistant
+VERSION = __version__
 
 # Platforms supported by this integration
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
