@@ -204,28 +204,35 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
 
             # If no errors, update the config entry
             if not errors:
-                return self.async_create_entry(
-                    title="",
+                # Update the config entry data (not options)
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
                     data={
                         CONF_UPDATE_INTERVAL: update_interval,
                         CONF_FAVORITE_PERFORMERS: favorite_performers,
                     },
                 )
+                return self.async_create_entry(title="", data={})
 
         # Get current values from config entry
-        current_update_interval = self.config_entry.data.get(
-            CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
-        )
-        current_favorite_performers = self.config_entry.data.get(
-            CONF_FAVORITE_PERFORMERS, DEFAULT_FAVORITE_PERFORMERS
-        )
-        
-        # Convert list to comma-separated string for display
-        if isinstance(current_favorite_performers, list):
-            favorite_performers_str = ", ".join(current_favorite_performers)
-        elif isinstance(current_favorite_performers, str):
-            favorite_performers_str = current_favorite_performers
-        else:
+        try:
+            current_update_interval = self.config_entry.data.get(
+                CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+            )
+            current_favorite_performers = self.config_entry.data.get(
+                CONF_FAVORITE_PERFORMERS, DEFAULT_FAVORITE_PERFORMERS
+            )
+            
+            # Convert list to comma-separated string for display
+            if isinstance(current_favorite_performers, list):
+                favorite_performers_str = ", ".join(current_favorite_performers)
+            elif isinstance(current_favorite_performers, str):
+                favorite_performers_str = current_favorite_performers
+            else:
+                favorite_performers_str = ""
+        except Exception:
+            # Fallback to defaults if there's any issue reading current values
+            current_update_interval = DEFAULT_UPDATE_INTERVAL
             favorite_performers_str = ""
 
         # Show the options form
