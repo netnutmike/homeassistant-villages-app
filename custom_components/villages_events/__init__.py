@@ -34,7 +34,6 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .__version__ import __version__
 from .const import DOMAIN
 from .coordinator import VillagesEventsCoordinator
 
