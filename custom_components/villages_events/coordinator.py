@@ -136,10 +136,13 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         Raises:
             UpdateFailed: When data fetch fails after retries.
         """
+        _LOGGER.info("Starting data fetch from The Villages API")
+        
         try:
             # Import from local villages_events module
             try:
                 from .villages_events import VillagesEvents
+                _LOGGER.info("Successfully imported VillagesEvents library")
             except ImportError as e:
                 _LOGGER.warning(
                     "Villages events library import failed: %s. "
@@ -160,6 +163,7 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             )
             
             # Fetch events using executor (library is synchronous)
+            _LOGGER.info("Creating VillagesEvents client and fetching data")
             client = VillagesEvents()
             events = await self.hass.async_add_executor_job(
                 client.get_events,
@@ -167,12 +171,15 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
                 tomorrow,
             )
             
+            _LOGGER.info("Received %d events from API", len(events))
+            
             # Structure data by venue and period
             venues_data = {}
             
-            _LOGGER.debug("Raw events from API: %d events", len(events))
             if events:
-                _LOGGER.debug("First event sample: %s", events[0])
+                _LOGGER.info("First event sample: %s", events[0])
+            else:
+                _LOGGER.warning("No events returned from API!")
             
             for event in events:
                 venue_name = event.get("venue", "Unknown Venue")
