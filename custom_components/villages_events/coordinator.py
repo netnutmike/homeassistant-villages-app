@@ -189,7 +189,8 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             if events:
                 _LOGGER.info("First event sample: %s", events[0])
             else:
-                _LOGGER.warning("No events returned from API!")
+                _LOGGER.warning("No events returned from API! Using mock data instead.")
+                return self._get_mock_data()
             
             for event in events:
                 venue_name = event.get("venue", "Unknown Venue")
