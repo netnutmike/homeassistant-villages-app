@@ -136,13 +136,10 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         Raises:
             UpdateFailed: When data fetch fails after retries.
         """
-        _LOGGER.info("Starting data fetch from The Villages API")
-        
         try:
             # Import from local villages_events module
             try:
                 from .villages_events import VillagesEvents
-                _LOGGER.info("Successfully imported VillagesEvents library")
             except ImportError as e:
                 _LOGGER.warning(
                     "Villages events library import failed: %s. "
@@ -163,32 +160,19 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             )
             
             # Fetch events using executor (library is synchronous)
-            # Fetch events using executor (library is synchronous)
-            _LOGGER.info("Creating VillagesEvents client")
             client = VillagesEvents()
+            events = await self.hass.async_add_executor_job(
+                client.get_events,
+                today,
+                tomorrow,
+            )
             
-            _LOGGER.info("Calling get_events with dates: %s to %s", today, tomorrow)
-            
-            # Wrap the call to catch any exceptions
-            try:
-                events = await self.hass.async_add_executor_job(
-                    client.get_events,
-                    today,
-                    tomorrow,
-                )
-            except Exception as e:
-                _LOGGER.error("Exception in get_events: %s", e, exc_info=True)
-                # Return empty for now to see if this is the issue
-                events = []
-            
-            _LOGGER.info("get_events completed, received %d events", len(events))
+            _LOGGER.info("Fetched %d events from The Villages API", len(events))
             
             # Structure data by venue and period
             venues_data = {}
             
-            if events:
-                _LOGGER.info("First event sample: %s", events[0])
-            else:
+            if not events:
                 _LOGGER.warning("No events returned from API! Using mock data instead.")
                 return self._get_mock_data()
             

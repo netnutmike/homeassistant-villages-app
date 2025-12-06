@@ -96,8 +96,8 @@ class VillagesEvents:
                 raise APIError(f"Invalid API response: expected dict, got {type(data).__name__}")
             
             # Extract events from response
-            # The API returns data in format: {"data": [...], "totalRows": N}
-            events = data.get('data', [])
+            # The API returns data in format: {"events": [...]}
+            events = data.get('events', [])
             
             if not isinstance(events, list):
                 raise APIError(f"Invalid events data: expected list, got {type(events).__name__}")
@@ -191,15 +191,17 @@ class VillagesEvents:
             Processed event dictionary or None if event should be filtered out
         """
         try:
-            # Extract event date
+            # Extract event date from start field
             start_info = event.get('start', {})
             event_date_str = start_info.get('date')
             
             if not event_date_str:
                 return None
             
-            # Parse date (format: YYYY-MM-DD)
-            event_date = datetime.strptime(event_date_str, '%Y-%m-%d').date()
+            # Parse ISO format date (e.g., "2025-12-06T17:00:00.000Z")
+            # Extract just the date part and parse the full datetime
+            event_datetime = datetime.fromisoformat(event_date_str.replace('Z', '+00:00'))
+            event_date = event_datetime.date()
             
             # Filter by date range
             if not (start_date <= event_date <= end_date):
@@ -212,31 +214,18 @@ class VillagesEvents:
             # Extract performer/title
             performer = event.get('title', 'Unknown')
             
-            # Extract times
-            start_time = None
-            end_time = None
+            # Extract times - start time from the ISO datetime
+            start_time = event_datetime
             
-            if not event.get('allDay', False):
-                start_time_str = start_info.get('time')
-                if start_time_str:
-                    try:
-                        start_time = datetime.strptime(
-                            f"{event_date_str} {start_time_str}",
-                            '%Y-%m-%d %H:%M:%S'
-                        )
-                    except ValueError:
-                        pass
-                
-                end_info = event.get('end', {})
-                end_time_str = end_info.get('time')
-                if end_time_str:
-                    try:
-                        end_time = datetime.strptime(
-                            f"{event_date_str} {end_time_str}",
-                            '%Y-%m-%d %H:%M:%S'
-                        )
-                    except ValueError:
-                        pass
+            # Extract end time
+            end_time = None
+            end_info = event.get('end', {})
+            end_date_str = end_info.get('date')
+            if end_date_str:
+                try:
+                    end_time = datetime.fromisoformat(end_date_str.replace('Z', '+00:00'))
+                except (ValueError, AttributeError):
+                    pass
             
             # Extract event type/category
             category = event.get('category', 'Event')
@@ -251,8 +240,11 @@ class VillagesEvents:
                 'event_type': category,
             }
             
-        except (KeyError, ValueError, TypeError):
+        except (KeyError, ValueError, TypeError) as e:
             # Skip events with invalid data
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Skipping event due to parsing error: {e}")
             return None
 
 
