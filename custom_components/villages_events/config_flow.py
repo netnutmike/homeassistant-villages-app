@@ -221,7 +221,12 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
         )
         
         # Convert list to comma-separated string for display
-        favorite_performers_str = ", ".join(current_favorite_performers)
+        if isinstance(current_favorite_performers, list):
+            favorite_performers_str = ", ".join(current_favorite_performers)
+        elif isinstance(current_favorite_performers, str):
+            favorite_performers_str = current_favorite_performers
+        else:
+            favorite_performers_str = ""
 
         # Show the options form
         data_schema = vol.Schema(
