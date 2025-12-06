@@ -384,17 +384,44 @@ automation:
           entity_id: sensor.villages_events_{{ trigger.event.data.venue | lower | replace(' ', '_') }}_{{ trigger.event.data.period }}
 ```
 
-## Development Mode
+## Data Source
 
-If the `python-villages-events` library is not installed, the integration will automatically use mock data for development and testing purposes. You'll see a warning in the logs:
+This integration uses the `python-villages-events` library to fetch real event data from The Villages entertainment calendar.
+
+### Getting Live Data
+
+The integration currently uses mock data because the `python-villages-events` library needs to be installed. To get live data:
+
+#### Option 1: Install the Library Locally
+
+1. Navigate to the `python-villages-events` directory in this repository
+2. Install the library:
+   ```bash
+   cd python-villages-events
+   pip install .
+   ```
+3. Restart Home Assistant
+4. The integration will automatically start using real data
+
+#### Option 2: Publish to PyPI (Recommended)
+
+1. Follow the instructions in `python-villages-events/INSTALL.md`
+2. Publish the library to PyPI
+3. Restart Home Assistant - it will automatically install the library
+
+### Development Mode
+
+If the `python-villages-events` library is not installed, the integration will automatically fall back to mock data for development and testing purposes. You'll see a warning in the logs:
 
 ```
 python-villages-events library not installed. Using mock data for development/testing.
 ```
 
-The mock data includes sample events at three venues (Spanish Springs Town Square, Lake Sumter Landing, and Brownwood Paddock Square) to allow testing of the integration's functionality.
+Once the library is installed, you'll see:
 
-To use real data, install the `python-villages-events` library and add it back to the `manifest.json` requirements.
+```
+Successfully fetched events for X venues
+```
 
 ## Troubleshooting
 
@@ -467,7 +494,7 @@ For issues, feature requests, or questions:
 
 ## Credits
 
-This integration uses the [python-villages-events](https://github.com/yourusername/python-villages-events) library to fetch event data from The Villages calendar.
+This integration uses the [python-villages-events](https://github.com/netnutmike/python-villages-events) library to fetch event data from The Villages calendar.
 
 ## License
 
