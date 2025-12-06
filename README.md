@@ -15,16 +15,20 @@ A Home Assistant custom integration that brings entertainment event information 
 - **HACS Compatible**: Easy installation and automatic updates through HACS
 - **UI Configuration**: No YAML editing required - configure everything through the UI
 
-## Documentation
+## 📚 Documentation
 
+- **[Complete Documentation](docs/README.md)** - Full documentation index
 - [Installation & Configuration](#installation) - Get started
 - [Entities & Attributes](#entities) - Available sensors and data
 - [Dashboard Examples](#dashboard-examples) - UI card examples
 - [Automation Examples](#automation-examples) - Automation ideas
-- [Services](SERVICES.md) - Manual refresh service
-- [Events](EVENTS.md) - Home Assistant events for automations
-- [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
-- [Developer Guide](DEVELOPER.md) - For developers
+
+### Quick Links
+- [Services](docs/SERVICES.md) - Manual refresh service
+- [Events](docs/EVENTS.md) - Home Assistant events for automations
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Developer Guide](docs/DEVELOPER.md) - For developers
+- [Changelog](docs/CHANGELOG.md) - Version history
 
 ## Installation
 

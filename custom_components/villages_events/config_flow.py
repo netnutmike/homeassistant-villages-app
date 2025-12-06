@@ -151,7 +151,7 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -184,7 +184,7 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
 
                 # Update config entry
                 self.hass.config_entries.async_update_entry(
-                    self.config_entry,
+                    self._config_entry,
                     data={
                         CONF_UPDATE_INTERVAL: update_interval,
                         CONF_FAVORITE_PERFORMERS: favorite_performers,
@@ -225,10 +225,10 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
                 favorite_performers = user_input.get(CONF_FAVORITE_PERFORMERS, "")
             else:
                 # Use config entry data as defaults
-                update_interval = self.config_entry.data.get(
+                update_interval = self._config_entry.data.get(
                     CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                 )
-                favorite_performers_list = self.config_entry.data.get(
+                favorite_performers_list = self._config_entry.data.get(
                     CONF_FAVORITE_PERFORMERS, []
                 )
                 
