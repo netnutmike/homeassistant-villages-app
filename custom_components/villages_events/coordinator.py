@@ -163,15 +163,25 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             )
             
             # Fetch events using executor (library is synchronous)
-            _LOGGER.info("Creating VillagesEvents client and fetching data")
+            # Fetch events using executor (library is synchronous)
+            _LOGGER.info("Creating VillagesEvents client")
             client = VillagesEvents()
-            events = await self.hass.async_add_executor_job(
-                client.get_events,
-                today,
-                tomorrow,
-            )
             
-            _LOGGER.info("Received %d events from API", len(events))
+            _LOGGER.info("Calling get_events with dates: %s to %s", today, tomorrow)
+            
+            # Wrap the call to catch any exceptions
+            try:
+                events = await self.hass.async_add_executor_job(
+                    client.get_events,
+                    today,
+                    tomorrow,
+                )
+            except Exception as e:
+                _LOGGER.error("Exception in get_events: %s", e, exc_info=True)
+                # Return empty for now to see if this is the issue
+                events = []
+            
+            _LOGGER.info("get_events completed, received %d events", len(events))
             
             # Structure data by venue and period
             venues_data = {}

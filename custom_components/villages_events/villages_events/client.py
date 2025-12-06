@@ -127,8 +127,13 @@ class VillagesEvents:
                 "event_type": str
             }
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         all_events = []
         today = date.today()
+        
+        logger.info(f"Fetching events from {start_date} to {end_date}, today is {today}")
         
         # Determine which date ranges to fetch
         date_ranges = []
@@ -141,15 +146,25 @@ class VillagesEvents:
         if not date_ranges:
             date_ranges.append('this-week')
         
+        logger.info(f"Will fetch date ranges: {date_ranges}")
+        
         # Fetch events for each date range
         for date_range in date_ranges:
             raw_events = self._fetch_events_for_date_range(date_range)
+            logger.info(f"Fetched {len(raw_events)} raw events for {date_range}")
+            
+            if raw_events:
+                logger.info(f"Sample raw event: {raw_events[0]}")
             
             # Process and filter events
+            processed_count = 0
             for event in raw_events:
                 processed_event = self._process_event(event, start_date, end_date)
                 if processed_event:
                     all_events.append(processed_event)
+                    processed_count += 1
+            
+            logger.info(f"Processed {processed_count} events from {date_range}")
         
         # Remove duplicates based on event ID
         seen_ids = set()
@@ -160,6 +175,7 @@ class VillagesEvents:
                 seen_ids.add(event_id)
                 unique_events.append(event)
         
+        logger.info(f"Returning {len(unique_events)} unique events")
         return unique_events
     
     def _process_event(self, event: Dict[str, Any], start_date: date, 
