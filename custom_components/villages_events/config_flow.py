@@ -157,72 +157,116 @@ class VillagesEventsOptionsFlow(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the options."""
-        if user_input is not None:
-            # Validate update interval
-            update_interval = user_input.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-            if not isinstance(update_interval, int) or not (
-                MIN_UPDATE_INTERVAL <= update_interval <= MAX_UPDATE_INTERVAL
-            ):
-                return self.async_show_form(
-                    step_id="init",
-                    data_schema=self._get_schema(user_input),
-                    errors={CONF_UPDATE_INTERVAL: "invalid_update_interval"},
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+        
+        try:
+            if user_input is not None:
+                # Validate update interval
+                update_interval = user_input.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+                if not isinstance(update_interval, int) or not (
+                    MIN_UPDATE_INTERVAL <= update_interval <= MAX_UPDATE_INTERVAL
+                ):
+                    return self.async_show_form(
+                        step_id="init",
+                        data_schema=self._get_schema(user_input),
+                        errors={CONF_UPDATE_INTERVAL: "invalid_update_interval"},
+                    )
+
+                # Parse favorite performers
+                favorite_performers_str = user_input.get(CONF_FAVORITE_PERFORMERS, "")
+                favorite_performers = []
+                
+                if favorite_performers_str:
+                    favorite_performers = [
+                        p.strip() for p in favorite_performers_str.split(",") if p.strip()
+                    ]
+
+                # Update config entry
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={
+                        CONF_UPDATE_INTERVAL: update_interval,
+                        CONF_FAVORITE_PERFORMERS: favorite_performers,
+                    },
                 )
+                return self.async_create_entry(title="", data={})
 
-            # Parse favorite performers
-            favorite_performers_str = user_input.get(CONF_FAVORITE_PERFORMERS, "")
-            favorite_performers = []
-            
-            if favorite_performers_str:
-                favorite_performers = [
-                    p.strip() for p in favorite_performers_str.split(",") if p.strip()
-                ]
-
-            # Update config entry
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data={
-                    CONF_UPDATE_INTERVAL: update_interval,
-                    CONF_FAVORITE_PERFORMERS: favorite_performers,
-                },
+            return self.async_show_form(
+                step_id="init",
+                data_schema=self._get_schema(),
             )
-            return self.async_create_entry(title="", data={})
-
-        return self.async_show_form(
-            step_id="init",
-            data_schema=self._get_schema(),
-        )
+        except Exception as err:
+            _LOGGER.error("Error in options flow: %s", err, exc_info=True)
+            # Return a form with default values
+            return self.async_show_form(
+                step_id="init",
+                data_schema=vol.Schema(
+                    {
+                        vol.Optional(
+                            CONF_UPDATE_INTERVAL,
+                            default=DEFAULT_UPDATE_INTERVAL,
+                        ): int,
+                        vol.Optional(
+                            CONF_FAVORITE_PERFORMERS,
+                            default="",
+                        ): str,
+                    }
+                ),
+                errors={"base": "unknown"},
+            )
 
     def _get_schema(self, user_input: dict[str, Any] | None = None) -> vol.Schema:
         """Get the schema for the options form."""
-        if user_input is not None:
-            # Use user input as defaults
-            update_interval = user_input.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-            favorite_performers = user_input.get(CONF_FAVORITE_PERFORMERS, "")
-        else:
-            # Use config entry data as defaults
-            update_interval = self.config_entry.data.get(
-                CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
-            )
-            favorite_performers_list = self.config_entry.data.get(
-                CONF_FAVORITE_PERFORMERS, []
-            )
-            
-            # Convert to string
-            if isinstance(favorite_performers_list, list):
-                favorite_performers = ", ".join(favorite_performers_list)
+        try:
+            if user_input is not None:
+                # Use user input as defaults
+                update_interval = user_input.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+                favorite_performers = user_input.get(CONF_FAVORITE_PERFORMERS, "")
             else:
-                favorite_performers = str(favorite_performers_list) if favorite_performers_list else ""
+                # Use config entry data as defaults
+                update_interval = self.config_entry.data.get(
+                    CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                )
+                favorite_performers_list = self.config_entry.data.get(
+                    CONF_FAVORITE_PERFORMERS, []
+                )
+                
+                # Convert to string safely
+                if isinstance(favorite_performers_list, list):
+                    favorite_performers = ", ".join(str(p) for p in favorite_performers_list)
+                elif isinstance(favorite_performers_list, str):
+                    favorite_performers = favorite_performers_list
+                else:
+                    favorite_performers = ""
 
-        return vol.Schema(
-            {
-                vol.Optional(
-                    CONF_UPDATE_INTERVAL,
-                    default=update_interval,
-                ): int,
-                vol.Optional(
-                    CONF_FAVORITE_PERFORMERS,
-                    default=favorite_performers,
-                ): str,
-            }
-        )
+            return vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_UPDATE_INTERVAL,
+                        default=update_interval,
+                    ): int,
+                    vol.Optional(
+                        CONF_FAVORITE_PERFORMERS,
+                        default=favorite_performers,
+                    ): str,
+                }
+            )
+        except Exception as err:
+            # Fallback to defaults if anything fails
+            import logging
+            _LOGGER = logging.getLogger(__name__)
+            _LOGGER.error("Error creating options schema: %s", err, exc_info=True)
+            
+            return vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_UPDATE_INTERVAL,
+                        default=DEFAULT_UPDATE_INTERVAL,
+                    ): int,
+                    vol.Optional(
+                        CONF_FAVORITE_PERFORMERS,
+                        default="",
+                    ): str,
+                }
+            )

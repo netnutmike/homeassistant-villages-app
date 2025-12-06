@@ -29,7 +29,8 @@
       }
     },
     "error": {
-      "invalid_update_interval": "Update interval must be between 15 and 1440 minutes"
+      "invalid_update_interval": "Update interval must be between 15 and 1440 minutes",
+      "unknown": "An unexpected error occurred. Please try again or check the logs."
     }
   },
   "services": {
