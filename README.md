@@ -1,7 +1,7 @@
 # The Villages Events - Home Assistant Integration
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/yourusername/villages-events-integration/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/yourusername/villages-events-integration/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 A Home Assistant custom integration that brings entertainment event information from The Villages, Florida directly to your dashboard. Track live performances at all venues, get notified when your favorite performers are scheduled, and plan your entertainment with ease.

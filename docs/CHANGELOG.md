@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-12-06
+
+### Added
+- Easy-access `performers` attribute for sensor entities (list of performer names)
+- Easy-access `venues` attribute for favorite performer binary sensors
+- Comprehensive documentation structure in `docs/` folder
+- Documentation index at `docs/README.md`
+- Documentation structure guide
+
+### Fixed
+- **Config flow options error** - Fixed "AttributeError: property 'config_entry' has no setter"
+- Options flow now works correctly when clicking gear icon to edit settings
+- Changed from `self.config_entry` to `self._config_entry` to avoid property conflict
+
+### Changed
+- Reorganized documentation into `docs/` folder for cleaner root directory
+- Updated all documentation links to point to new location
+- Improved error handling in config flow with better logging
+
+### Documentation
+- Created comprehensive documentation index
+- Added troubleshooting guides for common issues
+- Added log viewing guide
+- Added cache clearing guide
+- Added icon troubleshooting guides
+
 ## [0.1.0] - 2024-12-06
 
 ### Added
@@ -46,5 +72,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Performer names easily accessible in attributes
 - Mock data fallback for testing and development
 
-[Unreleased]: https://github.com/yourusername/villages-events-integration/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/yourusername/villages-events-integration/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/yourusername/villages-events-integration/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/yourusername/villages-events-integration/releases/tag/v0.1.0
