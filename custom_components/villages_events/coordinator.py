@@ -170,6 +170,10 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             # Structure data by venue and period
             venues_data = {}
             
+            _LOGGER.debug("Raw events from API: %d events", len(events))
+            if events:
+                _LOGGER.debug("First event sample: %s", events[0])
+            
             for event in events:
                 venue_name = event.get("venue", "Unknown Venue")
                 event_date = event.get("date")
@@ -229,9 +233,10 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
             else:
                 self.consecutive_failures = 0
             
-            _LOGGER.debug(
-                "Successfully fetched events for %d venues",
+            _LOGGER.info(
+                "Successfully fetched events for %d venues: %s",
                 len(venues_data),
+                list(venues_data.keys())
             )
             
             # Fire events for new data
