@@ -4,7 +4,20 @@
 
 If you get a "Config flow could not be loaded: 500 Internal Server Error" when trying to edit integration options:
 
-### Solution 1: Restart Home Assistant
+### Solution 1: Clear Python Cache
+
+Home Assistant may be using cached bytecode. See [CLEAR_CACHE.md](CLEAR_CACHE.md) for detailed instructions.
+
+Quick fix:
+```bash
+cd /config/custom_components/villages_events
+find . -type d -name __pycache__ -exec rm -rf {} +
+find . -name "*.pyc" -delete
+```
+
+Then restart Home Assistant.
+
+### Solution 2: Restart Home Assistant
 
 Config flow changes require a **full restart** of Home Assistant, not just a reload:
 
