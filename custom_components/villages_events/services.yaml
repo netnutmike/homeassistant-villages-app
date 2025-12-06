@@ -1,0 +1,6 @@
+# Services for The Villages Events integration
+
+refresh:
+  name: Refresh Events
+  description: Manually refresh event data from The Villages calendar. This will fetch the latest events and update all sensors immediately, bypassing the normal update interval.
+  fields: {}

@@ -31,5 +31,11 @@
     "error": {
       "invalid_update_interval": "Update interval must be between 15 and 1440 minutes"
     }
+  },
+  "services": {
+    "refresh": {
+      "name": "Refresh Events",
+      "description": "Manually refresh event data from The Villages calendar"
+    }
   }
 }

@@ -51,3 +51,7 @@ ATTR_COUNT = "count"  # Count of matching events
 
 # Units of measurement
 UNIT_EVENTS = "events"  # Unit for event count sensors
+
+# Home Assistant events fired by this integration
+EVENT_NEW_EVENTS = f"{DOMAIN}_new_events"  # Fired when new events are detected
+EVENT_FAVORITE_PERFORMER = f"{DOMAIN}_favorite_performer"  # Fired when favorite performer detected

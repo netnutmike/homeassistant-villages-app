@@ -62,6 +62,38 @@ To change settings after initial setup:
 4. Update your settings
 5. Click **Submit**
 
+## Services
+
+### `villages_events.refresh`
+
+Manually refresh event data from The Villages calendar. This bypasses the normal update interval and fetches the latest events immediately.
+
+**Usage in Automations:**
+
+```yaml
+automation:
+  - alias: "Refresh Events Every Morning"
+    trigger:
+      - platform: time
+        at: "08:00:00"
+    action:
+      - service: villages_events.refresh
+```
+
+**Usage in Scripts:**
+
+```yaml
+script:
+  refresh_villages_events:
+    alias: "Refresh Villages Events"
+    sequence:
+      - service: villages_events.refresh
+```
+
+**Call from Developer Tools:**
+
+Go to **Developer Tools** → **Services**, search for "Villages Events: Refresh Events", and click "Call Service".
+
 ## Entities Created
 
 ### Sensor Entities
@@ -164,7 +196,70 @@ cards:
 
 ## Automation Examples
 
-### Notify When Favorite Performer Is Scheduled
+### Using Events (Recommended)
+
+The integration fires Home Assistant events that you can use in automations:
+
+#### Event: `villages_events_favorite_performer`
+
+Fired when a favorite performer is newly detected.
+
+**Event Data:**
+- `period`: "today" or "tomorrow"
+- `event_count`: Number of matching events
+- `events`: List of event details
+- `favorite_performers`: Your configured favorites
+
+```yaml
+automation:
+  - alias: "Notify Favorite Performer Detected"
+    trigger:
+      - platform: event
+        event_type: villages_events_favorite_performer
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "🎵 Favorite Performer Alert!"
+          message: >
+            {% for event in trigger.event.data.events %}
+              {{ event.performer }} at {{ event.venue }} {{ trigger.event.data.period }}
+              at {{ event.start_time | as_timestamp | timestamp_custom('%I:%M %p') }}
+            {% endfor %}
+```
+
+#### Event: `villages_events_new_events`
+
+Fired when new events are detected at any venue.
+
+**Event Data:**
+- `venue`: Venue name
+- `period`: "today" or "tomorrow"
+- `event_count`: Total number of events
+- `new_count`: Number of new events
+- `events`: List of all events
+
+```yaml
+automation:
+  - alias: "Notify New Events at Spanish Springs"
+    trigger:
+      - platform: event
+        event_type: villages_events_new_events
+        event_data:
+          venue: "Spanish Springs Town Square"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "New Events at {{ trigger.event.data.venue }}"
+          message: >
+            {{ trigger.event.data.new_count }} new event(s) added for {{ trigger.event.data.period }}!
+            Total: {{ trigger.event.data.event_count }} events
+```
+
+### Using State Changes
+
+You can also trigger automations based on entity state changes:
+
+#### Notify When Favorite Performer Is Scheduled
 
 ```yaml
 automation:
@@ -183,7 +278,7 @@ automation:
             {% endfor %}
 ```
 
-### Daily Event Summary
+### Daily Event Summary with Refresh
 
 ```yaml
 automation:
@@ -192,6 +287,12 @@ automation:
       - platform: time
         at: "09:00:00"
     action:
+      # First refresh the data
+      - service: villages_events.refresh
+      # Wait for refresh to complete
+      - delay:
+          seconds: 5
+      # Then send notification with latest data
       - service: notify.mobile_app
         data:
           title: "Today's Entertainment"
@@ -200,6 +301,87 @@ automation:
                           states('sensor.villages_events_brownwood_today') | int + 
                           states('sensor.villages_events_lake_sumter_today') | int %}
             {{ total }} events scheduled today at The Villages!
+```
+
+### Refresh on Demand with Button
+
+```yaml
+automation:
+  - alias: "Refresh Events Button"
+    trigger:
+      - platform: state
+        entity_id: input_button.refresh_villages_events
+    action:
+      - service: villages_events.refresh
+      - service: notify.persistent_notification
+        data:
+          title: "Villages Events"
+          message: "Event data refreshed successfully!"
+```
+
+### Advanced Event-Based Automations
+
+#### Create Calendar Entries for Favorite Performers
+
+```yaml
+automation:
+  - alias: "Add Favorite Performer to Calendar"
+    trigger:
+      - platform: event
+        event_type: villages_events_favorite_performer
+    action:
+      - repeat:
+          for_each: "{{ trigger.event.data.events }}"
+          sequence:
+            - service: calendar.create_event
+              target:
+                entity_id: calendar.personal
+              data:
+                summary: "{{ repeat.item.performer }} at The Villages"
+                description: "{{ repeat.item.event_type }} at {{ repeat.item.venue }}"
+                start_date_time: "{{ repeat.item.start_time }}"
+                end_date_time: "{{ repeat.item.end_time }}"
+```
+
+#### Send Rich Notification with Action Buttons
+
+```yaml
+automation:
+  - alias: "Favorite Performer with Actions"
+    trigger:
+      - platform: event
+        event_type: villages_events_favorite_performer
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "🎵 {{ trigger.event.data.events[0].performer }}"
+          message: >
+            Playing {{ trigger.event.data.period }} at {{ trigger.event.data.events[0].venue }}
+            {{ trigger.event.data.events[0].start_time | as_timestamp | timestamp_custom('%I:%M %p') }}
+          data:
+            actions:
+              - action: "ADD_TO_CALENDAR"
+                title: "Add to Calendar"
+              - action: "VIEW_VENUE"
+                title: "View Venue Info"
+```
+
+#### Log All New Events to Logbook
+
+```yaml
+automation:
+  - alias: "Log New Events"
+    trigger:
+      - platform: event
+        event_type: villages_events_new_events
+    action:
+      - service: logbook.log
+        data:
+          name: "Villages Events"
+          message: >
+            {{ trigger.event.data.new_count }} new event(s) at {{ trigger.event.data.venue }} 
+            for {{ trigger.event.data.period }}
+          entity_id: sensor.villages_events_{{ trigger.event.data.venue | lower | replace(' ', '_') }}_{{ trigger.event.data.period }}
 ```
 
 ## Development Mode
@@ -267,6 +449,13 @@ To use real data, install the `python-villages-events` library and add it back t
 - Check if The Villages website is accessible from your network
 - Verify the `python-villages-events` library is installed correctly
 - Wait for automatic recovery when connectivity is restored
+
+## Documentation
+
+- **[Services Reference](SERVICES.md)** - Detailed guide for the `villages_events.refresh` service
+- **[Events Reference](EVENTS.md)** - Complete guide for event-based automations
+- **[Developer Documentation](DEVELOPER.md)** - Architecture and development guide
+- **[Debugging Guide](DEBUG.md)** - Troubleshooting and debugging steps
 
 ## Support
 

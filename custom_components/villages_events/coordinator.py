@@ -29,6 +29,8 @@ from .const import (
     CONF_UPDATE_INTERVAL,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
+    EVENT_NEW_EVENTS,
+    EVENT_FAVORITE_PERFORMER,
     MAX_CONSECUTIVE_FAILURES,
     PERIOD_TODAY,
     PERIOD_TOMORROW,
@@ -98,6 +100,9 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         
         # Track consecutive failures for error handling
         self.consecutive_failures = 0
+        
+        # Track previous data for detecting new events
+        self.last_data = None
         
         super().__init__(
             hass,
@@ -228,6 +233,12 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
                 "Successfully fetched events for %d venues",
                 len(venues_data),
             )
+            
+            # Fire events for new data
+            self._fire_events(result)
+            
+            # Store current data for next comparison
+            self.last_data = result
             
             return result
             
@@ -398,6 +409,129 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         """
         return self.consecutive_failures >= MAX_CONSECUTIVE_FAILURES
 
+    def _fire_events(self, current_data: dict[str, Any]) -> None:
+        """Fire Home Assistant events for new data.
+        
+        Fires events when:
+        - New events are detected for any venue
+        - Favorite performers are newly scheduled
+        
+        Args:
+            current_data: The current data from this update
+        """
+        # Fire event for new events at venues
+        if self.last_data:
+            # Compare current and previous data to find new events
+            current_venues = current_data.get("venues", {})
+            last_venues = self.last_data.get("venues", {})
+            
+            for venue_name, periods in current_venues.items():
+                for period in [PERIOD_TODAY, PERIOD_TOMORROW]:
+                    current_events = periods.get(period, [])
+                    last_events = last_venues.get(venue_name, {}).get(period, [])
+                    
+                    # Check if there are new events (simple count comparison)
+                    if len(current_events) > len(last_events):
+                        new_count = len(current_events) - len(last_events)
+                        _LOGGER.debug(
+                            "Detected %d new event(s) at %s for %s",
+                            new_count,
+                            venue_name,
+                            period,
+                        )
+                        
+                        # Fire event
+                        self.hass.bus.fire(
+                            EVENT_NEW_EVENTS,
+                            {
+                                "venue": venue_name,
+                                "period": period,
+                                "event_count": len(current_events),
+                                "new_count": new_count,
+                                "events": current_events,
+                            },
+                        )
+        
+        # Fire event for favorite performers
+        favorite_today = current_data.get("favorite_today", False)
+        favorite_tomorrow = current_data.get("favorite_tomorrow", False)
+        
+        # Check if this is a new favorite detection
+        if self.last_data:
+            last_favorite_today = self.last_data.get("favorite_today", False)
+            last_favorite_tomorrow = self.last_data.get("favorite_tomorrow", False)
+            
+            # Fire event if favorite newly detected today
+            if favorite_today and not last_favorite_today:
+                favorite_events = current_data.get("favorite_events", {}).get(PERIOD_TODAY, [])
+                _LOGGER.info(
+                    "Favorite performer(s) newly detected for today: %d event(s)",
+                    len(favorite_events),
+                )
+                
+                self.hass.bus.fire(
+                    EVENT_FAVORITE_PERFORMER,
+                    {
+                        "period": PERIOD_TODAY,
+                        "event_count": len(favorite_events),
+                        "events": favorite_events,
+                        "favorite_performers": self.favorite_performers,
+                    },
+                )
+            
+            # Fire event if favorite newly detected tomorrow
+            if favorite_tomorrow and not last_favorite_tomorrow:
+                favorite_events = current_data.get("favorite_events", {}).get(PERIOD_TOMORROW, [])
+                _LOGGER.info(
+                    "Favorite performer(s) newly detected for tomorrow: %d event(s)",
+                    len(favorite_events),
+                )
+                
+                self.hass.bus.fire(
+                    EVENT_FAVORITE_PERFORMER,
+                    {
+                        "period": PERIOD_TOMORROW,
+                        "event_count": len(favorite_events),
+                        "events": favorite_events,
+                        "favorite_performers": self.favorite_performers,
+                    },
+                )
+        else:
+            # First run - fire events if favorites are present
+            if favorite_today:
+                favorite_events = current_data.get("favorite_events", {}).get(PERIOD_TODAY, [])
+                _LOGGER.info(
+                    "Favorite performer(s) detected for today: %d event(s)",
+                    len(favorite_events),
+                )
+                
+                self.hass.bus.fire(
+                    EVENT_FAVORITE_PERFORMER,
+                    {
+                        "period": PERIOD_TODAY,
+                        "event_count": len(favorite_events),
+                        "events": favorite_events,
+                        "favorite_performers": self.favorite_performers,
+                    },
+                )
+            
+            if favorite_tomorrow:
+                favorite_events = current_data.get("favorite_events", {}).get(PERIOD_TOMORROW, [])
+                _LOGGER.info(
+                    "Favorite performer(s) detected for tomorrow: %d event(s)",
+                    len(favorite_events),
+                )
+                
+                self.hass.bus.fire(
+                    EVENT_FAVORITE_PERFORMER,
+                    {
+                        "period": PERIOD_TOMORROW,
+                        "event_count": len(favorite_events),
+                        "events": favorite_events,
+                        "favorite_performers": self.favorite_performers,
+                    },
+                )
+
     def _get_mock_data(self) -> dict[str, Any]:
         """Return mock data for development/testing.
         
@@ -477,5 +611,6 @@ class VillagesEventsCoordinator(DataUpdateCoordinator):
         result.update(self._match_favorite_performers(mock_venues_data))
         
         _LOGGER.info("Using mock data with %d venues", len(mock_venues_data))
+        _LOGGER.debug("Mock data structure: %s", result)
         
         return result

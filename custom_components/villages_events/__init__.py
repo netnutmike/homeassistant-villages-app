@@ -78,10 +78,43 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         len(coordinator.data.get("venues", {})),
     )
     
+    # Register services
+    await async_setup_services(hass)
+    
     # Forward setup to platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
     return True
+
+
+async def async_setup_services(hass: HomeAssistant) -> None:
+    """Set up services for The Villages Events integration.
+    
+    Args:
+        hass: Home Assistant instance
+    """
+    async def handle_refresh(call) -> None:
+        """Handle the refresh service call.
+        
+        Args:
+            call: Service call data
+        """
+        _LOGGER.info("Manual refresh service called")
+        
+        # Refresh all coordinators
+        for entry_id, coordinator in hass.data[DOMAIN].items():
+            if isinstance(coordinator, VillagesEventsCoordinator):
+                _LOGGER.debug("Refreshing coordinator for entry %s", entry_id)
+                await coordinator.async_request_refresh()
+        
+        _LOGGER.info("Manual refresh completed for all coordinators")
+    
+    # Register the refresh service
+    hass.services.async_register(
+        DOMAIN,
+        "refresh",
+        handle_refresh,
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

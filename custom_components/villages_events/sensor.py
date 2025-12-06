@@ -57,13 +57,17 @@ async def async_setup_entry(
     # Retrieve coordinator from hass.data
     coordinator: VillagesEventsCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     
+    _LOGGER.debug("Setting up sensor platform, coordinator.data: %s", coordinator.data)
+    
     entities = []
     
     # Create sensor entities for each venue and period
     if coordinator.data and "venues" in coordinator.data:
         venues_data = coordinator.data["venues"]
+        _LOGGER.debug("Found %d venues in coordinator data", len(venues_data))
         
         for venue_name in venues_data.keys():
+            _LOGGER.debug("Creating sensors for venue: %s", venue_name)
             # Create sensor for today's events
             entities.append(
                 VillagesEventSensor(
@@ -81,6 +85,11 @@ async def async_setup_entry(
                     period=PERIOD_TOMORROW,
                 )
             )
+    else:
+        _LOGGER.warning(
+            "No venue data available in coordinator. coordinator.data: %s",
+            coordinator.data
+        )
     
     # Add entities to Home Assistant
     async_add_entities(entities)

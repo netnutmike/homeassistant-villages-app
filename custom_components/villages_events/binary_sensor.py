@@ -58,6 +58,8 @@ async def async_setup_entry(
     # Retrieve coordinator from hass.data
     coordinator: VillagesEventsCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     
+    _LOGGER.debug("Setting up binary_sensor platform, coordinator.data: %s", coordinator.data)
+    
     entities = []
     
     # Create binary sensor for favorite performers today
