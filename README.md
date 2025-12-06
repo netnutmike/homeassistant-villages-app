@@ -108,6 +108,8 @@ The integration creates sensor entities for each venue with today's and tomorrow
 - `venue`: Venue name
 - `period`: "today" or "tomorrow"
 - `events`: List of event details (performer, start_time, end_time, event_type)
+- `performers`: List of performer names (easy access)
+- `event_count`: Number of events
 - `last_updated`: Timestamp of last data update
 
 ### Binary Sensor Entities
@@ -121,6 +123,8 @@ If you configure favorite performers, the integration creates:
 **Attributes**:
 - `favorite_performers`: Your configured list of favorites
 - `matching_events`: Details of events featuring your favorites
+- `performers`: List of matching performer names (easy access)
+- `venues`: List of venues where favorites are playing (easy access)
 - `count`: Number of matching events
 
 ## Dashboard Examples
@@ -133,6 +137,23 @@ title: Spanish Springs Tonight
 entities:
   - entity: sensor.villages_events_spanish_springs_today
     secondary_info: last-updated
+```
+
+### Simple Performer List
+
+```yaml
+type: markdown
+content: >
+  ## Spanish Springs Tonight
+  
+  {% if states('sensor.villages_events_spanish_springs_today') | int > 0 %}
+    **Performers:**
+    {% for performer in state_attr('sensor.villages_events_spanish_springs_today', 'performers') %}
+      - {{ performer }}
+    {% endfor %}
+  {% else %}
+    No events scheduled today
+  {% endif %}
 ```
 
 ### Detailed Event Card with Attributes
@@ -253,6 +274,47 @@ automation:
           message: >
             {{ trigger.event.data.new_count }} new event(s) added for {{ trigger.event.data.period }}!
             Total: {{ trigger.event.data.event_count }} events
+```
+
+### Using Performer Names in Automations
+
+Send a notification with just the performer names:
+
+```yaml
+automation:
+  - alias: "Daily Event Summary"
+    trigger:
+      - platform: time
+        at: "08:00:00"
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.villages_events_spanish_springs_today
+        above: 0
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Tonight at Spanish Springs"
+          message: >
+            Performers: {{ state_attr('sensor.villages_events_spanish_springs_today', 'performers') | join(', ') }}
+```
+
+Check if a specific performer is playing:
+
+```yaml
+automation:
+  - alias: "Check for Specific Performer"
+    trigger:
+      - platform: state
+        entity_id: sensor.villages_events_spanish_springs_today
+    condition:
+      - condition: template
+        value_template: >
+          {{ 'The Beatles' in state_attr('sensor.villages_events_spanish_springs_today', 'performers') }}
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "The Beatles are playing!"
+          message: "Don't miss them at Spanish Springs tonight!"
 ```
 
 ### Using State Changes

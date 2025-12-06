@@ -238,13 +238,15 @@ class VillagesEventSensor(CoordinatorEntity, SensorEntity):
         """Return additional state attributes.
         
         Returns:
-            Dictionary containing venue, period, events list, and last_updated
+            Dictionary containing venue, period, events list, performer names, and last_updated
         """
         attributes = {
             ATTR_VENUE: self.venue_name,
             ATTR_PERIOD: self.period,
             ATTR_EVENTS: [],
             ATTR_LAST_UPDATED: None,
+            "performers": [],  # List of performer names for easy access
+            "event_count": 0,
         }
         
         # Return empty attributes if coordinator is unavailable
@@ -265,9 +267,14 @@ class VillagesEventSensor(CoordinatorEntity, SensorEntity):
             
             # Format events for attributes
             formatted_events = []
+            performer_names = []
+            
             for event in events:
+                performer = event.get("performer", "Unknown")
+                performer_names.append(performer)
+                
                 formatted_event = {
-                    "performer": event.get("performer", "Unknown"),
+                    "performer": performer,
                     "event_type": event.get("event_type", "Event"),
                 }
                 
@@ -294,6 +301,8 @@ class VillagesEventSensor(CoordinatorEntity, SensorEntity):
                 formatted_events.append(formatted_event)
             
             attributes[ATTR_EVENTS] = formatted_events
+            attributes["performers"] = performer_names
+            attributes["event_count"] = len(events)
         
         # Add last updated timestamp
         attributes[ATTR_LAST_UPDATED] = dt_util.now().isoformat()

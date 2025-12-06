@@ -187,12 +187,14 @@ class VillagesFavoritePerformerSensor(CoordinatorEntity, BinarySensorEntity):
         
         Returns:
             Dictionary containing favorite_performers list, matching_events,
-            and count of matching events
+            performer names, venues, and count of matching events
         """
         attributes = {
             ATTR_FAVORITE_PERFORMERS: [],
             ATTR_MATCHING_EVENTS: [],
             ATTR_COUNT: 0,
+            "performers": [],  # List of performer names for easy access
+            "venues": [],  # List of venue names for easy access
         }
         
         # Return empty attributes if coordinator is unavailable
@@ -211,10 +213,19 @@ class VillagesFavoritePerformerSensor(CoordinatorEntity, BinarySensorEntity):
         
         # Format matching events for attributes
         formatted_events = []
+        performer_names = []
+        venue_names = []
+        
         for event in matching_events:
+            performer = event.get("performer", "Unknown")
+            venue = event.get("venue", "Unknown Venue")
+            
+            performer_names.append(performer)
+            venue_names.append(venue)
+            
             formatted_event = {
-                "performer": event.get("performer", "Unknown"),
-                "venue": event.get("venue", "Unknown Venue"),
+                "performer": performer,
+                "venue": venue,
             }
             
             # Format start_time if available
@@ -241,5 +252,7 @@ class VillagesFavoritePerformerSensor(CoordinatorEntity, BinarySensorEntity):
         
         attributes[ATTR_MATCHING_EVENTS] = formatted_events
         attributes[ATTR_COUNT] = len(formatted_events)
+        attributes["performers"] = performer_names
+        attributes["venues"] = venue_names
         
         return attributes
